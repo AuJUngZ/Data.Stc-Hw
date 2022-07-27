@@ -15,10 +15,10 @@ public class SinglyLinkedList {
             if(current.next == null){ //ถ้าลิสต์มีข้อมูลเดียว ลบได้เลย
                 head = null;
             }else{
-                while(current.next != null){ //วนลูปวนลูปจนกว่าจะถึงตำแหน่งสุดท้าย
+                while(current.next.next != null){ //วนลูปจนกว่าจะตัวรองสุดท้าย
                     current = current.next;
                 }
-                current.previous.next = null; //ลบข้อมูลตำแหน่งสุดท้าย
+                current.next = null; //ลบตัวสุดท้ายออก
             }
         }
     }
@@ -31,7 +31,6 @@ public class SinglyLinkedList {
                 head = null; //ลบออกได้เลย
             }else{ //ถ้าลิสต์มีมากกว่า 1 ตัว
                 head = head.next; //ลบ head ออกไป
-                head.previous = null; //ลบตัวก่อน head ออกไป
             }
         }
     }
@@ -67,21 +66,19 @@ public class SinglyLinkedList {
             this.head = node; //ถ้าลิสต์ว่างเปล่า ให้เอา node มาเป็น head
         }else{
             node.next = head; //เอา next ของ node ต่อไปที่ head
-            head.previous = node; //เอา previous ของ head ต่อไปที่ node
             head = node; //สลับ head เป็น node แทน
         }
     }
     
     public void pushBack(Node node) {
-        if (isEmpty()){
+        if (isEmpty()){ //ถ้าลิสต์ว่างเปล่า ให้แจ้ง ERROR
             this.head = node;
         } else {
-            Node current = head;
-            while(current.next != null){
+            Node current = head; //สร้าง node current มาเพื่อวนเช็ค
+            while(current.next != null){ //วนลูปจนกว่าจะตัวสุดท้าย
                 current = current.next;
             }
-            current.next = node;
-            node.previous = current;
+            current.next = node; //ต่อตัวสุดท้ายชี้ไปที่ Node ที่ส่งมา
         }
     }
 
@@ -105,42 +102,34 @@ public class SinglyLinkedList {
             System.out.println("ERROR");
             return new Node("Empty List!");
         } else { //ถ้าไม่ว่าง
-            Node DelNode = null; // สร้าง node ที่จะลบออกมา for เก็บค่าตัวนั้นไว้เพื่อ return.
-            Node current = head; //declare current เป็น head : use for loop
-            while(current != null){ // loop ปกติจนถึง tail
-                if(current.student_id == id){ // ถ้าตัวนั้นมี id ที่ต้องการ
-                    DelNode = current; //ให้ DelNode เป็น current
-                    if(current == head) popFront(); //ถ้าอยู่ first node use : popFront();
-                    else if(current.next == null) popBack(); //ถ้าอยู่ last node use : popBack();
-                    else{ //ถ้าไม่ใช่ first และ last node ก็ทำตามนี้
-                        current.previous.next = current.next;
-                        current.next.previous = current.previous;
+            Node Del = null; //สร้าง node Del มาเพื่อเก็บตัวที่ต้องการลบ
+            Node current = head; //สร้าง node current มาเพื่อวนเช็ค
+            while(current != null){ //วนลูปจนกว่าจะตัวสุดท้าย
+                if(head.student_id == id){ //ถ้าตรงกับตัวแรก pop ตัวแรกออก
+                    Del = head;
+                    popFront();
+                    return Del;
+                }else{ //ถ้าไม่ตรงกับตัวแรก
+                    if(current.next.student_id == id){ //loopไปหาตัวก่อนหน้าที่ต้องการลบ
+                        Del = current.next;
+                        current.next = current.next.next; //ลบตัวถัดไปของcurrent (ลบตัวที่ต้องการลบ)
+                        return Del; //return Del ออกมาเพื่อแสดงผล
                     }
-                    return DelNode; //return ตัวที่ลบไป
                 }
-                current = current.next; //เปลี่ยน current ไปเรื่อยๆ จนถึง tail
+                current = current.next; //วนลูปต่อ
+                if(current.next == null) break; //ถ้าเป็นตัวสุดท้ายของ list จะ break ออกจาก loop ทันทีไม่งั้นจะเกิด bug เพราะตัวสุดท้ายจะไม่มี next แล้วถ้ายังเอาไปเช็คต่อจะเกิด NullPointerException
             }
-            return new Node("Student Not Found!"); // ถ้าไม่เจอ return เป็น Node ที่มี Error msg.
+            return new Node("Student Not Found!"); //ถ้าไม่เจอ return เป็น Node ที่มี Error msg.
         }
     }
     
     public void addNodeAfter(Node node1, Node node2){
-        if(node1 == head){ //ถ้า Node1 คือ head ให้นำ node2 ต่อ node1 ได้เลย
-            node2.next = head.next; //ต่อ node
-            head.next.previous = node2;
-            head.next = node2;
-            node2.previous = head;
-        }else{ //ถ้า Node1 ไม่ใช่ head 
-            Node current = head; 
-            while(current != node1){ //loop จนถึง node1
-                current = current.next;
-            }
-            //นำ node2 ต่อ node1 ได้เลย
-            node2.next = current.next; //ต่อ node
-            current.next = node2;
-            node2.previous = current;
-            current.next = node2;
+        Node current = head;
+        while(current != node1){
+            current = current.next;
         }
+        node2.next = current.next;
+        current.next = node2; 
     }
     
     public void addNodeBefore(Node node1, Node node2){
@@ -148,13 +137,12 @@ public class SinglyLinkedList {
             pushFront(node2);
         }else{ //ถ้า Node1 ไม่ใช่ head
             Node current = head;
-            while(current != node1){ //loop จนถึง node1
+            while(current.next != node1){ //loop จนถึงตัวก่อนหน้าnode1
                 current = current.next;
             }
             //นำ node2 ไว้ข้างหน้า node1 ได้เลย
-            current.previous.next = node2;
-            node2.previous = current.previous;
-            node2.next = current;
+            node2.next = current.next;
+            current.next = node2;
         }
     }
     
@@ -172,7 +160,6 @@ public class SinglyLinkedList {
         }
         //ต่อ node ตัวสุดท้ายกับ head ชอง list ที่ส่งมา
         current.next = list.head;
-        list.head.previous = current;
     }
     
     public void printStructure(){
